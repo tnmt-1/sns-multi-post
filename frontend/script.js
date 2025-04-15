@@ -11,9 +11,13 @@ const API_URL = {
 let platforms = {}; // 利用可能なプラットフォーム
 let characterLimits = {}; // 文字数制限
 let postMode = 'unified'; // 投稿モード (unified or individual)
+let isDarkMode = false; // ダークモード状態
 
 // DOMが読み込まれた後に実行
 document.addEventListener('DOMContentLoaded', function() {
+    // ダークモードの初期設定
+    initDarkMode();
+    
     // 初期化
     initApp();
 
@@ -23,7 +27,57 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 投稿ボタンのイベントリスナー
     document.getElementById('post-button').addEventListener('click', handlePost);
+    
+    // ダークモード切り替えボタンのイベントリスナー
+    document.getElementById('dark-mode-toggle').addEventListener('click', toggleDarkMode);
 });
+
+// ダークモード初期設定
+function initDarkMode() {
+    // ローカルストレージからダークモード設定を取得
+    const savedMode = localStorage.getItem('darkMode');
+    isDarkMode = savedMode === 'true';
+    
+    // ダークモードボタンのテキスト更新
+    updateDarkModeButtonText();
+    
+    // ダークモード適用
+    applyDarkMode(isDarkMode);
+}
+
+// ダークモードの切り替え
+function toggleDarkMode() {
+    isDarkMode = !isDarkMode;
+    
+    // ローカルストレージに設定を保存
+    localStorage.setItem('darkMode', isDarkMode);
+    
+    // ダークモードボタンのテキスト更新
+    updateDarkModeButtonText();
+    
+    // ダークモード適用
+    applyDarkMode(isDarkMode);
+}
+
+// ダークモードボタンのテキスト更新
+function updateDarkModeButtonText() {
+    const button = document.getElementById('dark-mode-toggle');
+    button.textContent = isDarkMode ? 'ライトモードへ切替' : 'ダークモードへ切替';
+}
+
+// ダークモードの適用
+function applyDarkMode(enable) {
+    const lightStylesheet = document.querySelector('link[title="light"]');
+    const darkStylesheet = document.querySelector('link[title="dark"]');
+    
+    if (enable) {
+        lightStylesheet.disabled = true;
+        darkStylesheet.disabled = false;
+    } else {
+        lightStylesheet.disabled = false;
+        darkStylesheet.disabled = true;
+    }
+}
 
 // アプリ初期化
 async function initApp() {
@@ -123,9 +177,9 @@ function setupUnifiedModeCounters() {
 
         // 文字数が多い場合は警告表示
         if (length > minLimit * 0.9) {
-            counter.style.color = '#e74c3c';
+            counter.style.color = isDarkMode ? '#f87171' : '#e74c3c';
         } else {
-            counter.style.color = '#666';
+            counter.style.color = isDarkMode ? '#aaa' : '#666';
         }
     });
 }
@@ -188,9 +242,9 @@ function setupIndividualCounters() {
 
             // 文字数が多い場合は警告表示
             if (length > limit * 0.9) {
-                counter.style.color = '#e74c3c';
+                counter.style.color = isDarkMode ? '#f87171' : '#e74c3c';
             } else {
-                counter.style.color = '#666';
+                counter.style.color = isDarkMode ? '#aaa' : '#666';
             }
         });
     });

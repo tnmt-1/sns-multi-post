@@ -1,0 +1,207 @@
+/* ダークモード用スタイル */
+:root {
+    --primary-color: #7aa9ff;
+    --secondary-color: #8eb4ff;
+    --dark-color: #e0e0e0;
+    --light-color: #121212;
+    --success-color: #4ade80;
+    --warning-color: #fbbf24;
+    --error-color: #f87171;
+    --background-color: #1a1a1a;
+    --card-background: #2a2a2a;
+    --text-color: #e0e0e0;
+    --border-color: #444;
+    --button-hover: #5a88cc;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+/* ヘッダー */
+header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* ダークモード切り替えボタン */
+#dark-mode-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #5a88cc;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#dark-mode-toggle:hover {
+    background: var(--button-hover);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+#dark-mode-toggle::before {
+    content: "";
+    width: 14px;
+    height: 14px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 2.992V3z"/></svg>');
+    background-size: contain;
+    display: inline-block;
+}
+
+/* セクション */
+section {
+    background: var(--card-background);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+/* プラットフォーム選択カード */
+.platform-card {
+    background: #333;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.platform-card.selected {
+    border-color: var(--primary-color);
+    background: rgba(122, 169, 255, 0.2);
+}
+
+.platform-card.disabled {
+    opacity: 0.5;
+    background: #2a2a2a;
+}
+
+.platform-status {
+    color: #aaa;
+}
+
+.platform-limit {
+    color: #888;
+}
+
+/* 投稿モード切り替え */
+.post-mode-toggle {
+    border: 1px solid var(--border-color);
+}
+
+.post-mode-toggle button {
+    background: #333;
+    color: #ddd;
+}
+
+.post-mode-toggle button.active {
+    background: var(--primary-color);
+    color: #111;
+}
+
+/* テキストエリア */
+textarea {
+    background-color: #333;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+textarea:focus {
+    border-color: var(--primary-color);
+    background-color: #3a3a3a;
+}
+
+.character-count {
+    color: #aaa;
+    background: rgba(51, 51, 51, 0.8);
+}
+
+/* 個別投稿モード */
+.individual-post {
+    border: 1px solid var(--border-color);
+    background: #333;
+}
+
+.individual-post-platform {
+    color: var(--primary-color);
+}
+
+/* 投稿ボタン */
+.post-button {
+    background-color: var(--primary-color);
+    color: #111;
+}
+
+.post-button:hover {
+    background-color: var(--secondary-color);
+}
+
+.post-button:disabled {
+    background-color: #555;
+    color: #888;
+}
+
+/* ステータス表示 */
+.status-message {
+    border-radius: var(--border-radius);
+}
+
+.status-success {
+    background-color: rgba(74, 222, 128, 0.2);
+    border: 1px solid var(--success-color);
+    color: var(--success-color);
+}
+
+.status-error {
+    background-color: rgba(248, 113, 113, 0.2);
+    border: 1px solid var(--error-color);
+    color: var(--error-color);
+}
+
+.platform-result {
+    background: #333;
+    border: 1px solid var(--border-color);
+}
+
+/* フッター */
+footer {
+    color: #777;
+}
+
+/* コードのシンタックスハイライト */
+code {
+    background-color: #2d2d2d;
+    color: #e6e6e6;
+    border: 1px solid #444;
+}
+
+pre {
+    background-color: #2d2d2d;
+    border: 1px solid #444;
+}
+
+/* テーブル */
+table {
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid var(--border-color);
+}
+
+th {
+    background-color: #333;
+}
+
+tr:nth-child(even) {
+    background-color: #2a2a2a;
+}
+
+tr:nth-child(odd) {
+    background-color: #333;
+}
