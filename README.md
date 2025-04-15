@@ -26,7 +26,7 @@ SNS Poster Appは、複数のSNSアカウント（Bluesky、X/Twitter、Threads�
 ### 1. リポジトリのクローン
 
 ```bash
-git clone https://github.com/naomina121/snsposterapp.git
+git clone https://github.com/naomina121/sns-multi-post.git
 cd sns_poster_app
 ```
 
@@ -141,7 +141,7 @@ sns_poster_app/
 |--------------|---------|------|
 | Bluesky      | 公式API | atproto ライブラリを使用 |
 | X / Twitter  | 公式API | tweepy ライブラリを使用 |
-| Threads      | 公式API | 公式APIが提供されるようになった場合の実装※ただし、、 |
+| Threads      | 公式API | Threads ライブラリを使用 ※ただし、APIトークンを入れなくても自動連係となります。アクセストークンのエラーにより投稿できるかはエラーを確認してください。 |
 | Misskey      | 公式API | misskey.py ライブラリを使用 |
 | Mastodon     | 公式API | mastodon.py ライブラリを使用 |
 
