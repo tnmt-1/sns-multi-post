@@ -1,10 +1,11 @@
-# SNS Poster App(β:ベータ版)
+# SNS Poster App
 
 複数のSNSプラットフォームに同時投稿できるWebアプリケーション。
+簡易的な文章投稿専用アプリになります。
 
 ## 概要
 
-![SNS Poster](image.png)
+![sns_poster_app](image-1.png)
 
 SNS Poster Appは、複数のSNSアカウント（Bluesky、X/Twitter、Threads、Misskey、Mastodon）を連携させ、一度の操作で複数のプラットフォームに同時投稿できるアプリケーションです。Docker環境で簡単に起動でき、各SNSの文字数制限に対応した投稿フォームを備えています。
 
@@ -15,9 +16,7 @@ SNS Poster Appは、複数のSNSアカウント（Bluesky、X/Twitter、Threads�
 - **一括/個別投稿モード**: 全プラットフォームに同じ内容を投稿するか、プラットフォームごとに異なる内容を投稿するかを選択可能
 - **プラットフォーム選択UI**: チェックボックスでSNSを個別に選択可能
 - **Docker対応**: コンテナ化されており、環境に依存せず簡単に起動可能
-- **DarkMode対応**: 使いやすいUIに設計しています。
-
-※ Tharedsのみ自動連携になっていますが、トークンを設定していないと動作ができません。
+- **DarkMode対応**: 使いやすいUIに設計しています。。
 
 ## システム要件
 
@@ -144,7 +143,7 @@ sns_poster_app/
 |--------------|---------|------|
 | Bluesky      | 公式API | atproto ライブラリを使用 |
 | X / Twitter  | 公式API | tweepy ライブラリを使用 |
-| Threads      | 公式API | Threads ライブラリを使用 ※ただし、APIトークンを入れなくても自動連携となります。アクセストークンのエラーにより投稿できるかはエラーを確認してください。 |
+| Threads      | 公式API | Threads ライブラリを使用 |
 | Misskey      | 公式API | misskey.py ライブラリを使用 |
 | Mastodon     | 公式API | mastodon.py ライブラリを使用 |
 
@@ -162,7 +161,7 @@ sns_poster_app/
 2. `SnsClient`クラスに新しいクライアント初期化と投稿メソッドを実装
 3. フロントエンドのUIを更新
 
-### 機能の拡張アイデア
+### ※ これらは実装されていません。
 
 - 画像や動画の投稿機能
 - 投稿予約機能
@@ -173,10 +172,6 @@ sns_poster_app/
 ## ライセンス
 
 このプロジェクトは[MITライセンス](LICENSE)の下で公開されています。
-
-## 貢献
-
-バグ報告や機能リクエストは、Issueトラッカーを使用してください。プルリクエストも歓迎します。
 
 ---
 

@@ -69,8 +69,13 @@ class SnsClient:
                 self.clients["misskey"] = misskey_client
         except Exception as e:
             print(f"Misskey setup error: {e}")
-
-        self.clients["threads"] = "test"
+        # Threadsのセットアップ
+        try:
+            threads_instance = os.getenv("THREADS_ACCESS_TOKEN")
+            if threads_instance:
+                self.clients["threads"] =threads_instance
+        except Exception as e:
+            print(f"Misskey setup error: {e}")
 
         # Mastodonのセットアップ
         try:
