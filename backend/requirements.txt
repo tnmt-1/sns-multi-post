@@ -1,0 +1,10 @@
+Flask==2.3.3
+Flask-WTF==1.1.1
+Flask-Cors==4.0.0
+requests==2.31.0
+python-dotenv==1.0.0
+atproto==0.0.60
+tweepy==4.14.0
+mastodon.py==1.8.1
+misskey.py==4.1.0
+gunicorn==21.2.0
