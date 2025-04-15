@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景円 -->
+  <circle cx="16" cy="16" r="16" fill="#4a86e8"/>
+  
+  <!-- SNSアイコンを模した図形 -->
+  <g transform="translate(6, 7)">
+    <!-- 投稿を表す吹き出し -->
+    <rect x="2" y="2" width="16" height="10" rx="2" ry="2" fill="white" />
+    
+    <!-- 吹き出しの三角形部分 -->
+    <polygon points="8,12 10,16 12,12" fill="white" />
+    
+    <!-- 複数SNSを表す線 -->
+    <line x1="5" y1="5" x2="15" y2="5" stroke="#4a86e8" stroke-width="1.5" />
+    <line x1="5" y1="8" x2="12" y2="8" stroke="#4a86e8" stroke-width="1.5" />
+    
+    <!-- 複数のプラットフォームを表す丸 -->
+    <circle cx="5" cy="18" r="1.8" fill="white" />
+    <circle cx="10" cy="18" r="1.8" fill="white" />
+    <circle cx="15" cy="18" r="1.8" fill="white" />
+  </g>
+</svg>
