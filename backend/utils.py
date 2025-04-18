@@ -93,6 +93,11 @@ class SnsClient:
         """Blueskyに投稿する関数"""
         try:
             if "bluesky" in self.clients:
+                bluesky_username = os.getenv("BLUESKY_USERNAME")
+                bluesky_password = os.getenv("BLUESKY_PASSWORD")
+                bluesky_client = AtprotoClient()
+                bluesky_client.login(bluesky_username, bluesky_password)
+                self.clients["bluesky"] = bluesky_client
                 response = self.clients["bluesky"].send_post(content)
                 return {"success": True, "response": "投稿成功"}
             return {"success": False, "error": "Blueskyクライアントが設定されていません"}
