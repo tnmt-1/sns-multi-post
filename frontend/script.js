@@ -30,6 +30,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ダークモード切り替えボタンのイベントリスナー
     document.getElementById('dark-mode-toggle').addEventListener('click', toggleDarkMode);
+
+    // Ctrl+Enterで投稿
+    setupCtrlEnterPost();
 });
 
 // ダークモード初期設定
@@ -62,7 +65,7 @@ function toggleDarkMode() {
 // ダークモードボタンのテキスト更新
 function updateDarkModeButtonText() {
     const button = document.getElementById('dark-mode-toggle');
-    button.textContent = isDarkMode ? 'ライトモードへ切替' : 'ダークモードへ切替';
+    // button.textContent = isDarkMode ? 'ライトモードへ切替' : 'ダークモードへ切替';
 }
 
 // ダークモードの適用
@@ -132,6 +135,8 @@ function renderPlatformSelectors() {
 
         if (platformInfo.enabled) {
             card.addEventListener('click', () => togglePlatformSelection(card));
+            // デフォルトでON（選択状態）にする
+            card.classList.add('selected');
         }
 
         // プラットフォーム名（先頭を大文字に）
@@ -145,6 +150,11 @@ function renderPlatformSelectors() {
 
         container.appendChild(card);
     });
+    
+    // 個別投稿モードの場合はUIを更新
+    if (postMode === 'individual') {
+        updateIndividualPosts();
+    }
 }
 
 // プラットフォーム選択の切り替え
@@ -375,6 +385,29 @@ function showPostResult(result) {
             statusContainer.appendChild(resultDiv);
         });
     }
+
+    // 投稿成功時にテキストエリアをクリア＆フォーカス
+    if (result.success) {
+        if (postMode === 'unified') {
+            const unifiedTextarea = document.getElementById('unified-content');
+            unifiedTextarea.value = '';
+            unifiedTextarea.focus();
+            // 文字数カウントもリセット
+            const counter = document.getElementById('unified-character-count');
+            if (counter) counter.textContent = `0 / ${unifiedTextarea.getAttribute('maxlength')}`;
+        } else if (postMode === 'individual') {
+            // 個別投稿モードの各テキストエリアをクリア＆最初のエリアにフォーカス
+            const textareas = document.querySelectorAll('.individual-content');
+            textareas.forEach((ta, idx) => {
+                ta.value = '';
+                // 文字数カウントもリセット
+                const limit = ta.getAttribute('maxlength');
+                const counter = ta.parentElement.querySelector('.character-count');
+                if (counter) counter.textContent = `0 / ${limit}`;
+                if (idx === 0) ta.focus();
+            });
+        }
+    }
 }
 
 // エラーメッセージの表示
@@ -388,4 +421,28 @@ function showError(message) {
     errorDiv.textContent = message;
 
     statusContainer.appendChild(errorDiv);
+}
+
+// Ctrl+Enterで投稿するイベント設定
+function setupCtrlEnterPost() {
+    // 一括投稿モード
+    const unifiedTextarea = document.getElementById('unified-content');
+    unifiedTextarea.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('post-button').click();
+        }
+    });
+
+    // 個別投稿モード
+    document.addEventListener('keydown', function(e) {
+        if (postMode === 'individual' && e.ctrlKey && e.key === 'Enter') {
+            // フォーカスが個別テキストエリアの場合のみ
+            const active = document.activeElement;
+            if (active && active.classList.contains('individual-content')) {
+                e.preventDefault();
+                document.getElementById('post-button').click();
+            }
+        }
+    });
 }

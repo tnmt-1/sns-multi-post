@@ -146,7 +146,7 @@ class SnsClient:
         """Misskeyに投稿する関数"""
         try:
             if "misskey" in self.clients:
-                note = self.clients["misskey"].notes_create(text=content)
+                note = self.clients["misskey"].notes_create(text=content, visibility=misskey.enum.NoteVisibility.HOME)
                 return {"success": True, "response": "投稿成功"}
             return {"success": False, "error": "Misskeyクライアントが設定されていません"}
         except Exception as e:

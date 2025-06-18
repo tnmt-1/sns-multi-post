@@ -1,77 +1,73 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SNS Poster - 複数SNS同時投稿アプリ</title>
-    <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="style.css" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
-      rel="stylesheet"
-      title="light"
-    />
-    <link rel="stylesheet" href="style_dark_hls.css" title="dark" disabled />
-  </head>
-  <body>
-    <div class="container">
-      <header>
-        <h1>SNS Poster</h1>
-        <p>複数のSNSに同時投稿できるアプリ</p>
-        <button id="dark-mode-toggle">ダークモード切り替え</button>
-      </header>
 
-      <main>
-        <section class="platforms-section">
-          <h2>投稿先の選択</h2>
-          <div class="platforms-container" id="platforms-container">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SNS Poster - 複数SNS同時投稿アプリ</title>
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet"
+    title="light" />
+  <link rel="stylesheet" href="style_dark_hls.css" title="dark" disabled />
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>SNS Poster</h1>
+      <p>複数のSNSに同時投稿できるアプリ</p>
+      <button id="dark-mode-toggle"></button>
+    </header>
+
+    <main>
+      <section class="platforms-section">
+        <h2>投稿先の選択</h2>
+        <div class="platforms-container" id="platforms-container">
+          <!-- JavaScriptで動的に生成 -->
+        </div>
+      </section>
+
+      <section class="content-section">
+        <h2>投稿内容の入力</h2>
+        <div class="post-mode-toggle">
+          <button id="unified-mode-btn" class="active">一括投稿モード</button>
+          <button id="individual-mode-btn">個別投稿モード</button>
+        </div>
+
+        <div id="unified-mode" class="post-mode">
+          <div class="textarea-container">
+            <textarea id="unified-content" placeholder="ここに投稿内容を入力してください..." maxlength="3000"></textarea>
+            <div class="character-count" id="unified-character-count">
+              0 / 3000
+            </div>
+          </div>
+        </div>
+
+        <div id="individual-mode" class="post-mode hidden">
+          <div id="individual-posts-container">
             <!-- JavaScriptで動的に生成 -->
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section class="content-section">
-          <h2>投稿内容の入力</h2>
-          <div class="post-mode-toggle">
-            <button id="unified-mode-btn" class="active">一括投稿モード</button>
-            <button id="individual-mode-btn">個別投稿モード</button>
-          </div>
+      <section class="action-section">
+        <button id="post-button" class="post-button">投稿する</button>
+      </section>
 
-          <div id="unified-mode" class="post-mode">
-            <div class="textarea-container">
-              <textarea
-                id="unified-content"
-                placeholder="ここに投稿内容を入力してください..."
-                maxlength="3000"
-              ></textarea>
-              <div class="character-count" id="unified-character-count">
-                0 / 3000
-              </div>
-            </div>
-          </div>
+      <section class="status-section">
+        <div id="status-container" class="status-container hidden">
+          <!-- 投稿結果をここに表示 -->
+        </div>
+      </section>
+    </main>
 
-          <div id="individual-mode" class="post-mode hidden">
-            <div id="individual-posts-container">
-              <!-- JavaScriptで動的に生成 -->
-            </div>
-          </div>
-        </section>
+    <footer>
+      <p>&copy; 2025 SNS Poster App</p>
+    </footer>
+  </div>
 
-        <section class="action-section">
-          <button id="post-button" class="post-button">投稿する</button>
-        </section>
+  <script src="../script.js"></script>
+</body>
 
-        <section class="status-section">
-          <div id="status-container" class="status-container hidden">
-            <!-- 投稿結果をここに表示 -->
-          </div>
-        </section>
-      </main>
-
-      <footer>
-        <p>&copy; 2025 SNS Poster App</p>
-      </footer>
-    </div>
-
-    <script src="../script.js"></script>
-  </body>
 </html>
