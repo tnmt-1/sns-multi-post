@@ -426,6 +426,52 @@ textarea:focus {
     }
 }
 
+/* トースト通知 */
+.toast-container {
+    position: fixed;
+    top: 32px;
+    right: 32px;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+}
+.toast {
+    min-width: 220px;
+    max-width: 350px;
+    background: #fff;
+    color: var(--dark-color);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    padding: 16px 24px;
+    font-size: 1em;
+    border-left: 6px solid var(--primary-color);
+    opacity: 0.98;
+    pointer-events: auto;
+    animation: toast-in 0.3s;
+}
+.toast-success { border-left-color: var(--success-color); }
+.toast-error { border-left-color: var(--error-color); }
+@keyframes toast-in {
+    from { transform: translateY(-30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 0.98; }
+}
+@media (max-width: 600px) {
+    .toast-container {
+        top: 8px;
+        right: 4px;
+        left: 4px;
+        align-items: center;
+    }
+    .toast {
+        min-width: 0;
+        width: 98vw;
+        max-width: 98vw;
+        padding: 12px 8px;
+    }
+}
+
 /* ユーティリティクラス */
 .hidden {
     display: none !important;

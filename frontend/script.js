@@ -393,35 +393,39 @@ async function handlePost() {
     }
 }
 
-// 投稿結果の表示
+// トースト通知表示
+function showToast(message, type = 'success', duration = 4000) {
+    const toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) return;
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    toastContainer.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 400);
+    }, duration);
+}
+
+// 投稿結果の表示（トースト通知に変更）
 function showPostResult(result) {
-    const statusContainer = document.getElementById('status-container');
-    statusContainer.innerHTML = '';
-    statusContainer.classList.remove('hidden');
-
     // 全体の成功/失敗に応じたメッセージ
-    const statusMessage = document.createElement('div');
-    statusMessage.className = `status-message ${result.success ? 'status-success' : 'status-error'}`;
-    statusMessage.textContent = result.success ? '投稿に成功しました！' : '一部のプラットフォームへの投稿に失敗しました。';
-
-    statusContainer.appendChild(statusMessage);
-
-    // 各プラットフォームの結果表示
+    let msg = '';
+    if (result.success) {
+        msg = '投稿に成功しました！';
+    } else {
+        msg = '一部のプラットフォームへの投稿に失敗しました。';
+    }
+    // 各プラットフォームの詳細も表示
     if (result.results) {
+        msg += '\n';
         Object.keys(result.results).forEach(platform => {
             const platformResult = result.results[platform];
-            const resultDiv = document.createElement('div');
-            resultDiv.className = 'platform-result';
-
             const displayName = platform.charAt(0).toUpperCase() + platform.slice(1);
-            resultDiv.innerHTML = `
-                <strong>${displayName}:</strong> ${platformResult.success ? '成功' : `失敗 (${platformResult.error})`}
-            `;
-
-            statusContainer.appendChild(resultDiv);
+            msg += `${displayName}: ${platformResult.success ? '成功' : `失敗 (${platformResult.error || 'エラー'}`}` + `)\n`;
         });
     }
-
+    showToast(msg, result.success ? 'success' : 'error', 6000);
     // 投稿成功時にテキストエリアをクリア＆フォーカス
     if (result.success) {
         if (postMode === 'unified') {
@@ -446,17 +450,9 @@ function showPostResult(result) {
     }
 }
 
-// エラーメッセージの表示
+// エラーメッセージの表示（トースト通知に変更）
 function showError(message) {
-    const statusContainer = document.getElementById('status-container');
-    statusContainer.innerHTML = '';
-    statusContainer.classList.remove('hidden');
-
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'status-message status-error';
-    errorDiv.textContent = message;
-
-    statusContainer.appendChild(errorDiv);
+    showToast(message, 'error');
 }
 
 // Ctrl+Enterで投稿するイベント設定
