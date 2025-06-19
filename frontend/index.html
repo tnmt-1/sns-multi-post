@@ -21,13 +21,6 @@
     </header>
 
     <main>
-      <section class="platforms-section">
-        <h2>投稿先の選択</h2>
-        <div class="platforms-container" id="platforms-container">
-          <!-- JavaScriptで動的に生成 -->
-        </div>
-      </section>
-
       <section class="content-section">
         <h2>投稿内容の入力</h2>
         <div class="post-mode-toggle">
@@ -50,6 +43,18 @@
           </div>
         </div>
       </section>
+
+      <button id="toggle-platforms-btn" class="toggle-platforms-btn" title="投稿先を選択">⚙️</button>
+      <!-- 投稿先選択モーダル -->
+      <div id="platforms-modal" class="modal hidden">
+        <div class="modal-content">
+          <span class="close-modal" id="close-platforms-modal">&times;</span>
+          <h2>投稿先の選択</h2>
+          <div class="platforms-container" id="platforms-container">
+            <!-- JavaScriptで動的に生成 -->
+          </div>
+        </div>
+      </div>
 
       <section class="action-section">
         <button id="post-button" class="post-button">投稿する</button>

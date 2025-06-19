@@ -33,6 +33,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Ctrl+Enterで投稿
     setupCtrlEnterPost();
+
+    // 投稿先モーダルの開閉
+    const modal = document.getElementById('platforms-modal');
+    const openBtn = document.getElementById('toggle-platforms-btn');
+    const closeBtn = document.getElementById('close-platforms-modal');
+    openBtn.addEventListener('click', function() {
+        modal.classList.remove('hidden');
+    });
+    closeBtn.addEventListener('click', function() {
+        modal.classList.add('hidden');
+    });
+    // モーダル外クリックで閉じる
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.classList.add('hidden');
+        }
+    });
 });
 
 // ダークモード初期設定
