@@ -119,6 +119,7 @@ async function initApp() {
 
         // 一括投稿モードの文字数カウント設定
         setupUnifiedModeCounters();
+        updateUnifiedCharLimit(); // 初期表示時にカウンター更新
 
         // 初期状態は一括投稿モード
         switchMode('unified');
@@ -192,29 +193,41 @@ function togglePlatformSelection(card) {
 
     // 選択状態に基づいて個別投稿モードのUIを更新
     updateIndividualPosts();
+    updateUnifiedCharLimit(); // 投稿先変更時にカウンター更新
 }
 
 // 一括投稿モードの文字数カウンター設定
 function setupUnifiedModeCounters() {
     const textarea = document.getElementById('unified-content');
     const counter = document.getElementById('unified-character-count');
-
-    // 最も小さい文字数制限を見つける
-    const minLimit = Math.min(...Object.values(characterLimits));
-    textarea.setAttribute('maxlength', minLimit);
-
-    // テキスト入力時のカウント更新
+    updateUnifiedCharLimit();
     textarea.addEventListener('input', function() {
-        const length = this.value.length;
-        counter.textContent = `${length} / ${minLimit}`;
+        const limit = getUnifiedCharLimit();
+        counter.textContent = `${textarea.value.length} / ${limit}`;
+    });
+}
 
-        // 文字数が多い場合は警告表示
-        if (length > minLimit * 0.9) {
-            counter.style.color = isDarkMode ? '#f87171' : '#e74c3c';
-        } else {
-            counter.style.color = isDarkMode ? '#aaa' : '#666';
+// 選択中の投稿先の中で一番少ない文字数制限を取得
+function getUnifiedCharLimit() {
+    const selected = Array.from(document.querySelectorAll('.platform-card.selected'));
+    if (selected.length === 0) return 3000;
+    let min = 3000;
+    selected.forEach(card => {
+        const platform = card.dataset.platform;
+        if (characterLimits[platform] && characterLimits[platform] < min) {
+            min = characterLimits[platform];
         }
     });
+    return min;
+}
+
+// カウンター表示を更新
+function updateUnifiedCharLimit() {
+    const textarea = document.getElementById('unified-content');
+    const counter = document.getElementById('unified-character-count');
+    const limit = getUnifiedCharLimit();
+    counter.textContent = `${textarea.value.length} / ${limit}`;
+    textarea.maxLength = limit;
 }
 
 // 個別投稿モードのUI更新
