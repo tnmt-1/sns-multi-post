@@ -12,6 +12,7 @@ let platforms = {}; // 利用可能なプラットフォーム
 let characterLimits = {}; // 文字数制限
 let postMode = 'unified'; // 投稿モード (unified or individual)
 let isDarkMode = false; // ダークモード状態
+let selectedImageFile = null; // 選択中の画像ファイル
 
 // DOMが読み込まれた後に実行
 document.addEventListener('DOMContentLoaded', function() {
@@ -56,6 +57,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const textarea = document.getElementById('unified-content');
         if (textarea) textarea.focus();
     }, 100);
+
+    // 画像アップロード初期化
+    setupImageUpload();
 });
 
 // ダークモード初期設定
@@ -366,23 +370,35 @@ async function handlePost() {
             });
         }
 
-        // APIに投稿リクエスト送信
-        const response = await fetch(API_URL.POST, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(postData)
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.error || '投稿に失敗しました');
+        // 画像が選択されている場合はmultipart/form-dataで送信
+        if (selectedImageFile) {
+            const formData = new FormData();
+            formData.append('image', selectedImageFile);
+            formData.append('postData', JSON.stringify(postData));
+            const response = await fetch(API_URL.POST, {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || '投稿に失敗しました');
+            }
+            showPostResult(result);
+        } else {
+            // 画像なしの場合は従来通りJSONで送信
+            const response = await fetch(API_URL.POST, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(postData)
+            });
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || '投稿に失敗しました');
+            }
+            showPostResult(result);
         }
-
-        // 投稿結果の表示
-        showPostResult(result);
 
     } catch (error) {
         showError(error.message);
@@ -477,4 +493,50 @@ function setupCtrlEnterPost() {
             }
         }
     });
+}
+
+// 画像アップロード・ペースト・プレビュー処理
+function setupImageUpload() {
+    const imageInput = document.getElementById('image-input');
+    const imageUploadBtn = document.getElementById('image-upload-btn');
+    const imageFilename = document.getElementById('image-filename');
+    const imagePreviewContainer = document.getElementById('image-preview-container');
+    const textarea = document.getElementById('unified-content');
+
+    // ファイル選択ボタン
+    imageUploadBtn.addEventListener('click', () => imageInput.click());
+
+    // ファイル選択時
+    imageInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+            setImageFile(e.target.files[0]);
+        }
+    });
+
+    // クリップボードからのペースト
+    textarea.addEventListener('paste', (e) => {
+        if (e.clipboardData && e.clipboardData.items) {
+            for (const item of e.clipboardData.items) {
+                if (item.type.startsWith('image/')) {
+                    const file = item.getAsFile();
+                    setImageFile(file);
+                    e.preventDefault();
+                    break;
+                }
+            }
+        }
+    });
+
+    // 画像ファイルをセット＆プレビュー
+    function setImageFile(file) {
+        if (!file) return;
+        selectedImageFile = file;
+        imageFilename.textContent = file.name;
+        // プレビュー表示
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            imagePreviewContainer.innerHTML = `<img src="${ev.target.result}" alt="preview" style="max-width:200px;max-height:200px;" />`;
+        };
+        reader.readAsDataURL(file);
+    }
 }

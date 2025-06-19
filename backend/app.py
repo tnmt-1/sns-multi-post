@@ -4,6 +4,7 @@ import os
 import json
 from utils import sns_client, get_character_limits
 from dotenv import load_dotenv
+from werkzeug.utils import secure_filename
 
 # .envファイルから環境変数を読み込む
 load_dotenv()
@@ -13,6 +14,10 @@ CORS(app)  # CORS設定を有効に
 
 # Flaskの秘密鍵を設定
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "default_secret_key")
+
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/')
 def index():
@@ -33,8 +38,23 @@ def get_platforms():
 
 @app.route('/api/post', methods=['POST'])
 def post_to_sns():
-    """選択されたSNSに投稿する"""
-    data = request.json
+    """選択されたSNSに投稿する（画像対応）"""
+    if request.content_type and request.content_type.startswith('multipart/form-data'):
+        # multipartの場合
+        post_data_json = request.form.get('postData')
+        if not post_data_json:
+            return jsonify({"success": False, "error": "postDataがありません"}), 400
+        data = json.loads(post_data_json)
+        image_file = request.files.get('image')
+        image_path = None
+        if image_file:
+            filename = secure_filename(image_file.filename)
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            image_file.save(image_path)
+    else:
+        # application/jsonの場合
+        data = request.json
+        image_path = None
 
     if not data:
         return jsonify({"success": False, "error": "データが送信されていません"}), 400
@@ -42,7 +62,10 @@ def post_to_sns():
     posts = {}
     for platform in ["bluesky", "x", "threads", "misskey", "mastodon"]:
         if platform in data and data[platform]["selected"]:
-            posts[platform] = data[platform]["content"]
+            posts[platform] = {
+                "content": data[platform]["content"],
+                "image_path": image_path
+            }
 
     if not posts:
         return jsonify({"success": False, "error": "投稿先のSNSが選択されていません"}), 400
