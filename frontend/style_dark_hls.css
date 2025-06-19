@@ -205,3 +205,13 @@ tr:nth-child(even) {
 tr:nth-child(odd) {
     background-color: #333;
 }
+
+a, a:visited {
+    color: #7aa9ff;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+a:hover, a:focus {
+    color: #4ade80;
+    text-decoration: underline;
+}
