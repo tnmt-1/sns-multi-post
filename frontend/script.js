@@ -50,6 +50,12 @@ document.addEventListener('DOMContentLoaded', function() {
             modal.classList.add('hidden');
         }
     });
+
+    // ページ表示時に投稿テキストエリアへ自動フォーカス
+    setTimeout(function() {
+        const textarea = document.getElementById('unified-content');
+        if (textarea) textarea.focus();
+    }, 100);
 });
 
 // ダークモード初期設定
