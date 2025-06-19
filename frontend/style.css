@@ -395,6 +395,37 @@ textarea:focus {
     }
 }
 
+/* フッター */
+.footer-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    padding: 20px 0;
+    color: #888;
+    font-size: 0.9em;
+}
+.copyright {
+    margin: 0;
+}
+.fork-info {
+    margin: 0;
+    text-align: right;
+    min-width: 180px;
+    word-break: break-all;
+}
+@media (max-width: 600px) {
+    .footer-flex {
+        flex-direction: column;
+        gap: 4px;
+        text-align: center;
+    }
+    .fork-info {
+        min-width: 0;
+        text-align: center;
+    }
+}
+
 /* ユーティリティクラス */
 .hidden {
     display: none !important;
