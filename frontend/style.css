@@ -472,6 +472,81 @@ textarea:focus {
     }
 }
 
+/* 画像選択UI */
+.image-upload-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.image-upload-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    width: 100%;
+}
+
+#image-upload-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 10px 18px;
+    font-size: 1em;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: background 0.2s, transform 0.2s;
+    font-weight: 500;
+}
+#image-upload-btn:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px) scale(1.04);
+}
+#image-upload-btn:active {
+    background: var(--primary-color);
+    transform: none;
+}
+#image-upload-btn .icon {
+    display: inline-block;
+    width: 1.2em;
+    height: 1.2em;
+    background: url('data:image/svg+xml;utf8,<svg fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm-4.5 6c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm7-14H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 18H5V6h14v16z"/></svg>') no-repeat center/contain;
+    margin-right: 4px;
+}
+#image-filename {
+    font-size: 0.98em;
+    color: #555;
+    background: #f3f3f3;
+    border-radius: 6px;
+    padding: 4px 10px;
+    min-width: 80px;
+    max-width: 220px;
+    overflow-x: auto;
+    white-space: nowrap;
+    display: none;
+}
+#image-filename.active {
+    display: inline-block;
+}
+#image-preview-container img {
+    max-height: 60px;
+    border-radius: 6px;
+    margin-left: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.image-upload-desc {
+    font-size: 0.9em;
+    color: #888;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
 /* ユーティリティクラス */
 .hidden {
     display: none !important;

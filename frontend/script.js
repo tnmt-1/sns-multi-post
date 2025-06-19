@@ -529,14 +529,24 @@ function setupImageUpload() {
 
     // 画像ファイルをセット＆プレビュー
     function setImageFile(file) {
-        if (!file) return;
+        if (!file) {
+            selectedImageFile = null;
+            imageFilename.textContent = '';
+            imageFilename.classList.remove('active');
+            imagePreviewContainer.innerHTML = '';
+            return;
+        }
         selectedImageFile = file;
         imageFilename.textContent = file.name;
+        imageFilename.classList.add('active');
         // プレビュー表示
         const reader = new FileReader();
         reader.onload = function(ev) {
-            imagePreviewContainer.innerHTML = `<img src="${ev.target.result}" alt="preview" style="max-width:200px;max-height:200px;" />`;
+            imagePreviewContainer.innerHTML = `<img src="${ev.target.result}" alt="preview" />`;
         };
         reader.readAsDataURL(file);
     }
+
+    // 初期状態でファイル名・プレビューを非表示に
+    setImageFile(null);
 }
