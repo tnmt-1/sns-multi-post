@@ -1,8 +1,33 @@
+"""
+Threadsへの投稿処理を担当するクラス。
+画像投稿は未対応。
+
+Attributes:
+    access_token: Threads API用アクセストークン
+"""
+
+
 class ThreadsPoster:
     def __init__(self, access_token):
+        """
+        ThreadsPosterの初期化。
+
+        Args:
+            access_token: Threads API用アクセストークン
+        """
         self.access_token = access_token
 
     def post(self, content, image_paths=None):
+        """
+        Threadsへ投稿を行う。
+        画像投稿は未対応。
+
+        Args:
+            content: 投稿本文
+            image_paths: 画像ファイルパスのリスト（未使用）
+        Returns:
+            dict: 投稿結果（success, response/error）
+        """
         import requests
 
         if image_paths:

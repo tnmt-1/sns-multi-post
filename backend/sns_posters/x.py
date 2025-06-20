@@ -1,3 +1,11 @@
+"""
+X（旧Twitter）への投稿処理を担当するクラス。
+画像アップロード・投稿処理をラップする。
+
+Attributes:
+    client: X APIクライアントインスタンス
+"""
+
 import os
 from requests_oauthlib import OAuth1
 import requests
@@ -5,9 +13,23 @@ import requests
 
 class XPoster:
     def __init__(self, client):
+        """
+        XPosterの初期化。
+
+        Args:
+            client: X APIクライアント
+        """
         self.client = client
 
     def upload_images(self, image_paths):
+        """
+        画像をXにアップロードする。
+
+        Args:
+            image_paths: 画像ファイルパスのリスト
+        Returns:
+            (media_idリスト, エラー文字列)
+        """
         media_ids = []
         x_api_key = os.getenv("X_API_KEY")
         x_api_secret = os.getenv("X_API_SECRET")
@@ -26,6 +48,15 @@ class XPoster:
         return media_ids, None
 
     def post(self, content, image_paths):
+        """
+        Xへ投稿を行う。
+
+        Args:
+            content: 投稿本文
+            image_paths: 画像ファイルパスのリスト
+        Returns:
+            dict: 投稿結果（success, response/error）
+        """
         try:
             media_ids = []
             err = None

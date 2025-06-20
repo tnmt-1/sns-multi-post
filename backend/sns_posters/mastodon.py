@@ -1,8 +1,31 @@
+"""
+Mastodonへの投稿処理を担当するクラス。
+画像アップロード・投稿処理をラップする。
+
+Attributes:
+    client: Mastodon APIクライアントインスタンス
+"""
+
+
 class MastodonPoster:
     def __init__(self, client):
+        """
+        MastodonPosterの初期化。
+
+        Args:
+            client: Mastodon APIクライアント
+        """
         self.client = client
 
     def upload_images(self, image_paths):
+        """
+        画像をMastodonにアップロードする。
+
+        Args:
+            image_paths: 画像ファイルパスのリスト
+        Returns:
+            (media_idリスト, エラー文字列)
+        """
         media_ids = []
         for image_path in image_paths:
             media = self.client.media_post(image_path)
@@ -10,6 +33,15 @@ class MastodonPoster:
         return media_ids, None
 
     def post(self, content, image_paths=None):
+        """
+        Mastodonへ投稿を行う。
+
+        Args:
+            content: 投稿本文
+            image_paths: 画像ファイルパスのリスト
+        Returns:
+            dict: 投稿結果（success, response/error）
+        """
         try:
             media_ids = []
             if image_paths:

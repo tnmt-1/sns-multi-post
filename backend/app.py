@@ -22,13 +22,19 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 @app.route("/")
 def index():
-    """フロントエンドのindex.htmlを返す"""
+    """
+    フロントエンドのindex.htmlを返す。
+    Reactや静的HTMLのトップページを返却。
+    """
     return send_from_directory("../frontend", "index.html")
 
 
 @app.route("/api/platforms", methods=["GET"])
 def get_platforms():
-    """利用可能なプラットフォームの一覧と文字数制限を返す"""
+    """
+    利用可能なプラットフォームの一覧と文字数制限を返す。
+    各SNSの有効/無効状態と文字数制限をJSONで返却。
+    """
     platforms = {
         "bluesky": {
             "enabled": "bluesky" in sns_client.clients,
@@ -56,7 +62,12 @@ def get_platforms():
 
 @app.route("/api/post", methods=["POST"])
 def post_to_sns():
-    """選択されたSNSに投稿する（画像対応・複数画像）"""
+    """
+    選択されたSNSに投稿する（画像対応・複数画像）。
+    multipart/form-dataまたはapplication/jsonで受信し、SNSごとに投稿処理を実行。
+    Returns:
+        投稿結果のJSON
+    """
     if request.content_type and request.content_type.startswith("multipart/form-data"):
         # multipartの場合
         post_data_json = request.form.get("postData")
@@ -113,7 +124,11 @@ def post_to_sns():
 
 @app.route("/api/character_limits", methods=["GET"])
 def character_limits():
-    """各SNSの文字数制限を返す"""
+    """
+    各SNSの文字数制限を返す。
+    Returns:
+        文字数制限のJSON
+    """
     return jsonify(get_character_limits())
 
 
