@@ -82,6 +82,12 @@ def post_to_sns():
     # 全体の成功・失敗を判定
     all_success = all(result.get("success", False) for result in results.values())
 
+    # 1SNSのみの場合はトップレベルに展開
+    if len(results) == 1:
+        platform, result = next(iter(results.items()))
+        response = {"platform": platform, **result}
+        return jsonify(response)
+
     return jsonify({
         "success": all_success,
         "results": results

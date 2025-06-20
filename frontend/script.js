@@ -335,73 +335,84 @@ async function handlePost() {
         }
 
         // 投稿データの準備
-        const postData = {};
-
+        let postDataPerPlatform = {};
         if (postMode === 'unified') {
             // 一括投稿モードの場合
             const content = document.getElementById('unified-content').value;
-
             if (!content.trim()) {
                 throw new Error('投稿内容を入力してください');
             }
-
-            // 全選択プラットフォームに同じ内容を設定
             selectedPlatforms.forEach(platform => {
-                postData[platform] = {
-                    selected: true,
-                    content: content
-                };
+                postDataPerPlatform[platform] = content;
             });
         } else {
             // 個別投稿モードの場合
             selectedPlatforms.forEach(platform => {
                 const textarea = document.querySelector(`.individual-content[data-platform="${platform}"]`);
                 const content = textarea ? textarea.value : '';
-
-                postData[platform] = {
-                    selected: true,
-                    content: content
-                };
-
-                // 内容が空の場合はエラー
                 if (!content.trim()) {
                     throw new Error(`${platform.charAt(0).toUpperCase() + platform.slice(1)}の投稿内容を入力してください`);
                 }
+                postDataPerPlatform[platform] = content;
             });
         }
 
-        // 画像が選択されている場合はmultipart/form-dataで送信
-        if (selectedImageFiles.length > 0) {
-            const formData = new FormData();
-            selectedImageFiles.forEach((file, idx) => {
-                formData.append('image' + (idx + 1), file);
-            });
-            formData.append('postData', JSON.stringify(postData));
-            const response = await fetch(API_URL.POST, {
-                method: 'POST',
-                body: formData
-            });
-            const result = await response.json();
-            if (!response.ok) {
-                throw new Error(result.error || '投稿に失敗しました');
+        // SNSごとにリクエストを作成
+        const fetchPromises = selectedPlatforms.map(platform => {
+            // 画像が選択されている場合はmultipart/form-dataで送信
+            if (selectedImageFiles.length > 0) {
+                const formData = new FormData();
+                selectedImageFiles.forEach((file, idx) => {
+                    formData.append('image' + (idx + 1), file);
+                });
+                // SNSごとにpostDataを分けて送信
+                const singlePostData = {};
+                singlePostData[platform] = {
+                    selected: true,
+                    content: postDataPerPlatform[platform]
+                };
+                formData.append('postData', JSON.stringify(singlePostData));
+                return fetch(API_URL.POST, {
+                    method: 'POST',
+                    body: formData
+                }).then(async response => {
+                    const result = await response.json();
+                    return { platform, success: response.ok, ...result };
+                }).catch(e => ({ platform, success: false, error: e.message }));
+            } else {
+                // 画像なしの場合はJSONで送信
+                const singlePostData = {};
+                singlePostData[platform] = {
+                    selected: true,
+                    content: postDataPerPlatform[platform ]
+                };
+                return fetch(API_URL.POST, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(singlePostData)
+                }).then(async response => {
+                    const result = await response.json();
+                    return { platform, success: response.ok, ...result };
+                }).catch(e => ({ platform, success: false, error: e.message }));
             }
-            showPostResult(result);
-        } else {
-            // 画像なしの場合は従来通りJSONで送信
-            const response = await fetch(API_URL.POST, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(postData)
-            });
-            const result = await response.json();
-            if (!response.ok) {
-                throw new Error(result.error || '投稿に失敗しました');
-            }
-            showPostResult(result);
-        }
+        });
 
+        // 並行リクエストを待つ
+        const results = await Promise.all(fetchPromises);
+        // 結果をまとめる
+        const resultSummary = {
+            success: results.every(r => r.success),
+            results: {}
+        };
+        results.forEach(r => {
+            resultSummary.results[r.platform] = {
+                success: r.success,
+                error: r.error || r.message || null
+            };
+        });
+        showPostResult(resultSummary);
     } catch (error) {
         showError(error.message);
     } finally {
