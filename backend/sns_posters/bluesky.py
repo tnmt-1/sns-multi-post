@@ -6,7 +6,7 @@ Attributes:
     client: Bluesky APIクライアントインスタンス
 """
 
-from backend.constants import IMAGE_LIMITS
+from constants import IMAGE_LIMITS
 
 
 class BlueskyPoster:
