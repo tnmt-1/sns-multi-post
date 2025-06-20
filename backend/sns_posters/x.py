@@ -1,0 +1,42 @@
+import os
+from requests_oauthlib import OAuth1
+import requests
+
+
+class XPoster:
+    def __init__(self, client):
+        self.client = client
+
+    def upload_images(self, image_paths):
+        media_ids = []
+        x_api_key = os.getenv("X_API_KEY")
+        x_api_secret = os.getenv("X_API_SECRET")
+        x_access_token = os.getenv("X_ACCESS_TOKEN")
+        x_access_token_secret = os.getenv("X_ACCESS_TOKEN_SECRET")
+        oauth = OAuth1(x_api_key, x_api_secret, x_access_token, x_access_token_secret)
+        upload_url = "https://upload.twitter.com/1.1/media/upload.json"
+        for image_path in image_paths:
+            with open(image_path, "rb") as f:
+                files = {"media": f}
+                resp = requests.post(upload_url, files=files, auth=oauth)
+            if resp.status_code != 200:
+                return None, f"media/upload失敗: {resp.text}"
+            media_id = resp.json().get("media_id_string")
+            media_ids.append(media_id)
+        return media_ids, None
+
+    def post(self, content, image_paths):
+        try:
+            media_ids = []
+            err = None
+            if image_paths:
+                media_ids, err = self.upload_images(image_paths)
+                if err:
+                    return {"success": False, "error": err}
+            if media_ids:
+                self.client.create_tweet(text=content, media_ids=media_ids)
+            else:
+                self.client.create_tweet(text=content)
+            return {"success": True, "response": "投稿成功"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
