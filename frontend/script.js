@@ -502,6 +502,7 @@ function setupImageUpload() {
     const imageFilename = document.getElementById('image-filename');
     const imagePreviewContainer = document.getElementById('image-preview-container');
     const textarea = document.getElementById('unified-content');
+    const imageRemoveBtn = document.getElementById('image-remove-btn');
 
     // ファイル選択ボタン
     imageUploadBtn.addEventListener('click', () => imageInput.click());
@@ -527,6 +528,13 @@ function setupImageUpload() {
         }
     });
 
+    // 画像削除ボタン
+    imageRemoveBtn.addEventListener('click', () => {
+        setImageFile(null);
+        imageInput.value = '';
+        imageRemoveBtn.style.display = 'none';
+    });
+
     // 画像ファイルをセット＆プレビュー
     function setImageFile(file) {
         if (!file) {
@@ -534,15 +542,27 @@ function setupImageUpload() {
             imageFilename.textContent = '';
             imageFilename.classList.remove('active');
             imagePreviewContainer.innerHTML = '';
+            imagePreviewContainer.classList.remove('active');
+            imageRemoveBtn.style.display = 'none';
             return;
         }
         selectedImageFile = file;
         imageFilename.textContent = file.name;
         imageFilename.classList.add('active');
-        // プレビュー表示
+        // プレビュー表示＋削除ボタンを右上に重ねて表示
         const reader = new FileReader();
         reader.onload = function(ev) {
-            imagePreviewContainer.innerHTML = `<img src="${ev.target.result}" alt="preview" />`;
+            imagePreviewContainer.innerHTML = `<img src="${ev.target.result}" alt="preview" />` +
+                `<button type="button" id="image-remove-btn" class="image-remove-btn" aria-label="画像を削除">✕</button>`;
+            imagePreviewContainer.classList.add('active');
+            // プレビュー内の削除ボタンにイベント付与
+            const removeBtn = imagePreviewContainer.querySelector('#image-remove-btn');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', () => {
+                    setImageFile(null);
+                    imageInput.value = '';
+                });
+            }
         };
         reader.readAsDataURL(file);
     }
