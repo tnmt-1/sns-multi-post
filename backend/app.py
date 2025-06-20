@@ -38,23 +38,29 @@ def get_platforms():
 
 @app.route('/api/post', methods=['POST'])
 def post_to_sns():
-    """選択されたSNSに投稿する（画像対応）"""
+    """選択されたSNSに投稿する（画像対応・複数画像）"""
     if request.content_type and request.content_type.startswith('multipart/form-data'):
         # multipartの場合
         post_data_json = request.form.get('postData')
         if not post_data_json:
             return jsonify({"success": False, "error": "postDataがありません"}), 400
         data = json.loads(post_data_json)
-        image_file = request.files.get('image')
-        image_path = None
-        if image_file:
-            filename = secure_filename(image_file.filename)
-            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            image_file.save(image_path)
+        # 複数画像対応
+        image_files = []
+        image_paths = []
+        for key in sorted(request.files):
+            if key.startswith('image'):
+                file = request.files.get(key)
+                if file and file.filename:
+                    filename = secure_filename(file.filename)
+                    image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(image_path)
+                    image_files.append(file)
+                    image_paths.append(image_path)
     else:
         # application/jsonの場合
         data = request.json
-        image_path = None
+        image_paths = []
 
     if not data:
         return jsonify({"success": False, "error": "データが送信されていません"}), 400
@@ -64,7 +70,7 @@ def post_to_sns():
         if platform in data and data[platform]["selected"]:
             posts[platform] = {
                 "content": data[platform]["content"],
-                "image_path": image_path
+                "image_paths": image_paths if image_paths else None
             }
 
     if not posts:

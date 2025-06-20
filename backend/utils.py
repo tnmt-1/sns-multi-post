@@ -92,8 +92,8 @@ class SnsClient:
         except Exception as e:
             print(f"Mastodon setup error: {e}")
 
-    def post_to_bluesky(self, content, image_path=None):
-        """Blueskyに投稿する関数（画像対応・1MB制限対応）"""
+    def post_to_bluesky(self, content, image_paths=None):
+        """Blueskyに投稿する関数（画像対応・複数画像・1MB制限対応・強制圧縮・無限ループ防止）"""
         try:
             if "bluesky" in self.clients:
                 bluesky_username = os.getenv("BLUESKY_USERNAME")
@@ -101,39 +101,42 @@ class SnsClient:
                 bluesky_client = AtprotoClient()
                 bluesky_client.login(bluesky_username, bluesky_password)
                 self.clients["bluesky"] = bluesky_client
-                if image_path:
-                    # 画像サイズが1MB超ならリサイズ・圧縮
-                    max_size = 976 * 1024  # 976.56KB
-                    with open(image_path, "rb") as f:
-                        img_bytes = f.read()
-                    if len(img_bytes) > max_size:
+                images = []
+                if image_paths:
+                    for image_path in image_paths[:4]:
+                        max_size = 976 * 1024  # 976.56KB
+                        with open(image_path, "rb") as f:
+                            img_bytes = f.read()
                         img = Image.open(io.BytesIO(img_bytes))
-                        # JPEG/PNGのみ対応
                         format = img.format if img.format in ["JPEG", "PNG"] else "JPEG"
-                        # サイズを縮小しながら圧縮
                         quality = 85
-                        for _ in range(10):
+                        buf = io.BytesIO()
+                        # 圧縮・リサイズを最大15回まで
+                        for attempt in range(15):
                             buf = io.BytesIO()
                             img.save(buf, format=format, quality=quality, optimize=True)
                             if buf.tell() <= max_size:
                                 break
-                            # さらに圧縮
-                            quality -= 10
-                            if quality < 30:
-                                img = img.resize(
-                                    (int(img.width * 0.8), int(img.height * 0.8))
-                                )
+                            # 5回ごとにさらにリサイズ
+                            if (attempt + 1) % 5 == 0:
+                                w, h = img.size
+                                if w < 100 or h < 100:
+                                    break  # これ以上小さくしない
+                                img = img.resize((max(1, int(w * 0.8)), max(1, int(h * 0.8))))
                                 quality = 85
+                            else:
+                                quality = max(30, quality - 10)
+                        else:
+                            return {"success": False, "error": f"画像がBlueskyの制限({max_size//1024}KB)以下になりません: {os.path.basename(image_path)}"}
                         buf.seek(0)
                         blob = bluesky_client.com.atproto.repo.upload_blob(buf)
-                    else:
-                        with open(image_path, "rb") as f:
-                            blob = bluesky_client.com.atproto.repo.upload_blob(f)
+                        images.append({"alt": "image", "image": blob["blob"]})
+                if images:
                     response = bluesky_client.send_post(
                         content,
                         embed={
                             "$type": "app.bsky.embed.images",
-                            "images": [{"alt": "image", "image": blob["blob"]}],
+                            "images": images,
                         },
                     )
                 else:
@@ -146,32 +149,33 @@ class SnsClient:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def post_to_x(self, content, image_path=None):
+    def post_to_x(self, content, image_paths=None):
         try:
             if "x" in self.clients:
-                if image_path:
-                    # v2 API: media/upload (OAuth1.0a) で画像アップロード
+                media_ids = []
+                if image_paths:
                     x_api_key = os.getenv("X_API_KEY")
                     x_api_secret = os.getenv("X_API_SECRET")
                     x_access_token = os.getenv("X_ACCESS_TOKEN")
                     x_access_token_secret = os.getenv("X_ACCESS_TOKEN_SECRET")
-
                     oauth = OAuth1(
                         x_api_key, x_api_secret, x_access_token, x_access_token_secret
                     )
                     upload_url = "https://upload.twitter.com/1.1/media/upload.json"
-                    with open(image_path, "rb") as f:
-                        files = {"media": f}
-                        resp = requests.post(upload_url, files=files, auth=oauth)
-                    if resp.status_code != 200:
-                        return {
-                            "success": False,
-                            "error": f"media/upload失敗: {resp.text}",
-                        }
-                    media_id = resp.json().get("media_id_string")
-                    # ツイート投稿（v2）
+                    for image_path in image_paths[:4]:
+                        with open(image_path, "rb") as f:
+                            files = {"media": f}
+                            resp = requests.post(upload_url, files=files, auth=oauth)
+                        if resp.status_code != 200:
+                            return {
+                                "success": False,
+                                "error": f"media/upload失敗: {resp.text}",
+                            }
+                        media_id = resp.json().get("media_id_string")
+                        media_ids.append(media_id)
+                if media_ids:
                     tweet = self.clients["x"].create_tweet(
-                        text=content, media_ids=[media_id]
+                        text=content, media_ids=media_ids
                     )
                 else:
                     tweet = self.clients["x"].create_tweet(text=content)
@@ -222,16 +226,20 @@ class SnsClient:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def post_to_misskey(self, content, image_path=None):
-        """Misskeyに投稿する関数（画像対応）"""
+    def post_to_misskey(self, content, image_paths=None):
+        """Misskeyに投稿する関数（画像対応・複数画像）"""
         try:
             if "misskey" in self.clients:
-                if image_path:
-                    with open(image_path, "rb") as f:
-                        file_obj = self.clients["misskey"].drive_files_create(file=f)
+                file_ids = []
+                if image_paths:
+                    for image_path in image_paths[:4]:
+                        with open(image_path, "rb") as f:
+                            file_obj = self.clients["misskey"].drive_files_create(file=f)
+                        file_ids.append(file_obj["id"])
+                if file_ids:
                     note = self.clients["misskey"].notes_create(
                         text=content,
-                        file_ids=[file_obj["id"]],
+                        file_ids=file_ids,
                         visibility=misskey.enum.NoteVisibility.HOME,
                     )
                 else:
@@ -246,14 +254,18 @@ class SnsClient:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def post_to_mastodon(self, content, image_path=None):
-        """Mastodonに投稿する関数（画像対応）"""
+    def post_to_mastodon(self, content, image_paths=None):
+        """Mastodonに投稿する関数（画像対応・複数画像）"""
         try:
             if "mastodon" in self.clients:
-                if image_path:
-                    media = self.clients["mastodon"].media_post(image_path)
+                media_ids = []
+                if image_paths:
+                    for image_path in image_paths[:4]:
+                        media = self.clients["mastodon"].media_post(image_path)
+                        media_ids.append(media["id"])
+                if media_ids:
                     status = self.clients["mastodon"].status_post(
-                        content, media_ids=[media["id"]]
+                        content, media_ids=media_ids
                     )
                 else:
                     status = self.clients["mastodon"].status_post(content)
@@ -269,7 +281,7 @@ class SnsClient:
         """複数のプラットフォームに投稿する関数
 
         Args:
-            posts: プラットフォーム名をキー、{"content":..., "image_path":...}を値とする辞書
+            posts: プラットフォーム名をキー、{"content":..., "image_paths":...}を値とする辞書
 
         Returns:
             各プラットフォームの投稿結果を含む辞書
@@ -277,17 +289,17 @@ class SnsClient:
         results = {}
         for platform, post in posts.items():
             content = post.get("content")
-            image_path = post.get("image_path")
+            image_paths = post.get("image_paths")  # リスト
             if platform == "bluesky" and content:
-                results["bluesky"] = self.post_to_bluesky(content, image_path)
+                results["bluesky"] = self.post_to_bluesky(content, image_paths)
             elif platform == "x" and content:
-                results["x"] = self.post_to_x(content, image_path)
+                results["x"] = self.post_to_x(content, image_paths)
             elif platform == "threads" and content:
-                results["threads"] = self.post_to_threads(content, image_path)
+                results["threads"] = self.post_to_threads(content)
             elif platform == "misskey" and content:
-                results["misskey"] = self.post_to_misskey(content, image_path)
+                results["misskey"] = self.post_to_misskey(content, image_paths)
             elif platform == "mastodon" and content:
-                results["mastodon"] = self.post_to_mastodon(content, image_path)
+                results["mastodon"] = self.post_to_mastodon(content, image_paths)
         return results
 
 

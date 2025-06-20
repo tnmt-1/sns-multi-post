@@ -12,7 +12,7 @@ let platforms = {}; // 利用可能なプラットフォーム
 let characterLimits = {}; // 文字数制限
 let postMode = 'unified'; // 投稿モード (unified or individual)
 let isDarkMode = false; // ダークモード状態
-let selectedImageFile = null; // 選択中の画像ファイル
+let selectedImageFiles = []; // 選択中の画像ファイル（最大2つ）
 
 // DOMが読み込まれた後に実行
 document.addEventListener('DOMContentLoaded', function() {
@@ -371,9 +371,11 @@ async function handlePost() {
         }
 
         // 画像が選択されている場合はmultipart/form-dataで送信
-        if (selectedImageFile) {
+        if (selectedImageFiles.length > 0) {
             const formData = new FormData();
-            formData.append('image', selectedImageFile);
+            selectedImageFiles.forEach((file, idx) => {
+                formData.append('image' + (idx + 1), file);
+            });
             formData.append('postData', JSON.stringify(postData));
             const response = await fetch(API_URL.POST, {
                 method: 'POST',
@@ -463,6 +465,11 @@ function showPostResult(result) {
                 if (idx === 0) ta.focus();
             });
         }
+        // 画像もリセット
+        if (typeof updateImagePreview === 'function') {
+            selectedImageFiles = [];
+            updateImagePreview();
+        }
     }
 }
 
@@ -502,15 +509,20 @@ function setupImageUpload() {
     const imageFilename = document.getElementById('image-filename');
     const imagePreviewContainer = document.getElementById('image-preview-container');
     const textarea = document.getElementById('unified-content');
-    const imageRemoveBtn = document.getElementById('image-remove-btn');
+    // const imageRemoveBtn = document.getElementById('image-remove-btn'); // 削除
 
     // ファイル選択ボタン
     imageUploadBtn.addEventListener('click', () => imageInput.click());
 
     // ファイル選択時
     imageInput.addEventListener('change', (e) => {
-        if (e.target.files && e.target.files[0]) {
-            setImageFile(e.target.files[0]);
+        if (e.target.files) {
+            for (const file of e.target.files) {
+                if (selectedImageFiles.length < 2) {
+                    addImageFile(file);
+                }
+            }
+            imageInput.value = '';
         }
     });
 
@@ -520,7 +532,9 @@ function setupImageUpload() {
             for (const item of e.clipboardData.items) {
                 if (item.type.startsWith('image/')) {
                     const file = item.getAsFile();
-                    setImageFile(file);
+                    if (selectedImageFiles.length < 2) {
+                        addImageFile(file);
+                    }
                     e.preventDefault();
                     break;
                 }
@@ -528,45 +542,45 @@ function setupImageUpload() {
         }
     });
 
-    // 画像削除ボタン
-    imageRemoveBtn.addEventListener('click', () => {
-        setImageFile(null);
-        imageInput.value = '';
-        imageRemoveBtn.style.display = 'none';
-    });
+    // 画像ファイルを追加＆プレビュー
+    function addImageFile(file) {
+        if (!file || selectedImageFiles.length >= 2) return;
+        selectedImageFiles.push(file);
+        updateImagePreview();
+    }
 
-    // 画像ファイルをセット＆プレビュー
-    function setImageFile(file) {
-        if (!file) {
-            selectedImageFile = null;
-            imageFilename.textContent = '';
+    // 画像ファイルを削除
+    function removeImageFile(idx) {
+        selectedImageFiles.splice(idx, 1);
+        updateImagePreview();
+    }
+
+    // プレビュー表示＋削除ボタン
+    function updateImagePreview() {
+        imagePreviewContainer.innerHTML = '';
+        imagePreviewContainer.classList.toggle('active', selectedImageFiles.length > 0);
+        imageFilename.textContent = selectedImageFiles.map(f => f.name).join(', ');
+        if (selectedImageFiles.length > 0) {
+            imageFilename.classList.add('active');
+        } else {
             imageFilename.classList.remove('active');
-            imagePreviewContainer.innerHTML = '';
-            imagePreviewContainer.classList.remove('active');
-            imageRemoveBtn.style.display = 'none';
-            return;
         }
-        selectedImageFile = file;
-        imageFilename.textContent = file.name;
-        imageFilename.classList.add('active');
-        // プレビュー表示＋削除ボタンを右上に重ねて表示
-        const reader = new FileReader();
-        reader.onload = function(ev) {
-            imagePreviewContainer.innerHTML = `<img src="${ev.target.result}" alt="preview" />` +
-                `<button type="button" id="image-remove-btn" class="image-remove-btn" aria-label="画像を削除">✕</button>`;
-            imagePreviewContainer.classList.add('active');
-            // プレビュー内の削除ボタンにイベント付与
-            const removeBtn = imagePreviewContainer.querySelector('#image-remove-btn');
-            if (removeBtn) {
-                removeBtn.addEventListener('click', () => {
-                    setImageFile(null);
-                    imageInput.value = '';
-                });
-            }
-        };
-        reader.readAsDataURL(file);
+        selectedImageFiles.forEach((file, idx) => {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'image-preview-item';
+                wrapper.innerHTML = `<img src="${ev.target.result}" alt="preview${idx+1}" />` +
+                    `<button type="button" class="image-remove-btn" aria-label="画像を削除" data-idx="${idx}">✕</button>`;
+                imagePreviewContainer.appendChild(wrapper);
+                // 削除ボタンイベント
+                wrapper.querySelector('.image-remove-btn').addEventListener('click', () => removeImageFile(idx));
+            };
+            reader.readAsDataURL(file);
+        });
     }
 
     // 初期状態でファイル名・プレビューを非表示に
-    setImageFile(null);
+    selectedImageFiles = [];
+    updateImagePreview();
 }
