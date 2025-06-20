@@ -552,7 +552,6 @@ textarea:focus {
     top: 8px;
     right: 8px;
     z-index: 2;
-    display: none;
     background: #e0e0e0;
     color: #444;
     border: none;
@@ -563,11 +562,11 @@ textarea:focus {
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(0,0,0,0.10);
     transition: background 0.2s, color 0.2s;
+    display: none;
 }
 
-.image-remove-btn:hover {
-    background: #bdbdbd;
-    color: #222;
+#image-preview-container.active .image-remove-btn {
+    display: block;
 }
 
 #image-preview-container {
