@@ -7,8 +7,12 @@ Attributes:
 """
 
 import os
+import logging
+
 from requests_oauthlib import OAuth1
 import requests
+
+logger = logging.getLogger(__name__)
 
 
 class XPoster:
@@ -70,4 +74,5 @@ class XPoster:
                 self.client.create_tweet(text=content)
             return {"success": True, "response": "投稿成功"}
         except Exception as e:
+            logger.error(f"X投稿エラー: {str(e)}", exc_info=True)
             return {"success": False, "error": str(e)}

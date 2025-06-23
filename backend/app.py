@@ -1,3 +1,6 @@
+import logging
+
+
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
@@ -6,6 +9,10 @@ from sns_client import sns_client, get_character_limits
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+)
 # .envファイルから環境変数を読み込む
 load_dotenv()
 

@@ -6,6 +6,10 @@ Attributes:
     access_token: Threads API用アクセストークン
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class ThreadsPoster:
     def __init__(self, access_token):
@@ -67,4 +71,5 @@ class ThreadsPoster:
                 "error": "Threadsクライアントが設定されていません",
             }
         except Exception as e:
+            logger.error(f"Threads投稿エラー: {str(e)}", exc_info=True)
             return {"success": False, "error": str(e)}

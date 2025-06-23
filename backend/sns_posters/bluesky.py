@@ -7,6 +7,9 @@ Attributes:
 """
 
 from constants import IMAGE_LIMITS
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class BlueskyPoster:
@@ -70,6 +73,7 @@ class BlueskyPoster:
         Returns:
             dict: 投稿結果（success, response/error）
         """
+
         def try_post():
             images = []
             err = None
@@ -94,20 +98,29 @@ class BlueskyPoster:
         try:
             return try_post()
         except Exception as e:
+            logger.error(f"Bluesky投稿エラー: {str(e)}", exc_info=True)
             # InvalidTokenエラー時はリフレッシュして再試行
             if (
-                hasattr(e, 'args') and e.args and isinstance(e.args[0], str)
-                and 'InvalidToken' in e.args[0]
-            ) or (
-                hasattr(e, 'error') and getattr(e, 'error', None) == 'InvalidToken'
-            ):
+                hasattr(e, "args")
+                and e.args
+                and isinstance(e.args[0], str)
+                and "InvalidToken" in e.args[0]
+            ) or (hasattr(e, "error") and getattr(e, "error", None) == "InvalidToken"):
                 try:
                     # loginにはユーザー名・パスワードが必要
-                    if hasattr(self.client, 'login') and self.username and self.password:
+                    if (
+                        hasattr(self.client, "login")
+                        and self.username
+                        and self.password
+                    ):
                         self.client.login(self.username, self.password)
                     else:
-                        return {"success": False, "error": "Bluesky認証情報が不足しています（ユーザー名・パスワード）"}
+                        return {
+                            "success": False,
+                            "error": "Bluesky認証情報が不足しています（ユーザー名・パスワード）",
+                        }
                     return try_post()
                 except Exception as e2:
+                    logger.error(f"Blueskyリフレッシュ失敗: {str(e2)}", exc_info=True)
                     return {"success": False, "error": f"リフレッシュ失敗: {str(e2)}"}
             return {"success": False, "error": str(e)}

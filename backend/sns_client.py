@@ -104,7 +104,7 @@ class SnsClient:
             self.posters["bluesky"] = BlueskyPoster(
                 bluesky_info["client"],
                 username=bluesky_info["username"],
-                password=bluesky_info["password"]
+                password=bluesky_info["password"],
             )
         if "x" in self.clients:
             self.posters["x"] = XPoster(self.clients["x"])

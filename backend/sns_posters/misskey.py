@@ -1,4 +1,8 @@
+import logging
+
 import misskey
+
+logger = logging.getLogger(__name__)
 
 
 class MisskeyPoster:
@@ -57,4 +61,5 @@ class MisskeyPoster:
                 )
             return {"success": True, "response": "投稿成功"}
         except Exception as e:
+            logger.error(f"Misskey投稿エラー: {str(e)}", exc_info=True)
             return {"success": False, "error": str(e)}

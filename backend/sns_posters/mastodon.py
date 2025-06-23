@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 """
 Mastodonへの投稿処理を担当するクラス。
 画像アップロード・投稿処理をラップする。
@@ -54,4 +58,5 @@ class MastodonPoster:
                 self.client.status_post(content)
             return {"success": True, "response": "投稿成功"}
         except Exception as e:
+            logger.error(f"Mastodon投稿エラー: {str(e)}", exc_info=True)
             return {"success": False, "error": str(e)}
