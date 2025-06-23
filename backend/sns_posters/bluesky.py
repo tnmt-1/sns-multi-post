@@ -66,7 +66,7 @@ class BlueskyPoster:
         Returns:
             dict: 投稿結果（success, response/error）
         """
-        try:
+        def try_post():
             images = []
             err = None
             if image_paths:
@@ -86,5 +86,26 @@ class BlueskyPoster:
             else:
                 self.client.send_post(content)
             return {"success": True, "response": "投稿成功"}
+
+        try:
+            return try_post()
         except Exception as e:
+            # InvalidTokenエラー時はリフレッシュして再試行
+            if (
+                hasattr(e, 'args') and e.args and isinstance(e.args[0], str)
+                and 'InvalidToken' in e.args[0]
+            ) or (
+                hasattr(e, 'error') and getattr(e, 'error', None) == 'InvalidToken'
+            ):
+                try:
+                    if hasattr(self.client, 'refresh_token'):
+                        self.client.refresh_token()
+                    elif hasattr(self.client, 'login'):
+                        # 必要に応じてloginメソッドで再認証
+                        self.client.login()
+                    else:
+                        return {"success": False, "error": "トークンリフレッシュメソッドが見つかりません"}
+                    return try_post()
+                except Exception as e2:
+                    return {"success": False, "error": f"リフレッシュ失敗: {str(e2)}"}
             return {"success": False, "error": str(e)}
