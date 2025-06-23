@@ -40,7 +40,12 @@ class SnsClient:
             if bluesky_username and bluesky_password:
                 bluesky_client = AtprotoClient()
                 bluesky_client.login(bluesky_username, bluesky_password)
-                self.clients["bluesky"] = bluesky_client
+                # Blueskyの認証情報も保持
+                self.clients["bluesky"] = {
+                    "client": bluesky_client,
+                    "username": bluesky_username,
+                    "password": bluesky_password,
+                }
         except Exception as e:
             print(f"Bluesky setup error: {e}")
 
@@ -94,7 +99,13 @@ class SnsClient:
         利用可能なSNSクライアントごとにPosterインスタンスを生成し、self.postersに格納する。
         """
         if "bluesky" in self.clients:
-            self.posters["bluesky"] = BlueskyPoster(self.clients["bluesky"])
+            # BlueskyPosterに認証情報も渡す
+            bluesky_info = self.clients["bluesky"]
+            self.posters["bluesky"] = BlueskyPoster(
+                bluesky_info["client"],
+                username=bluesky_info["username"],
+                password=bluesky_info["password"]
+            )
         if "x" in self.clients:
             self.posters["x"] = XPoster(self.clients["x"])
         if "threads" in self.clients:

@@ -10,14 +10,18 @@ from constants import IMAGE_LIMITS
 
 
 class BlueskyPoster:
-    def __init__(self, client):
+    def __init__(self, client, username=None, password=None):
         """
         BlueskyPosterの初期化。
 
         Args:
             client: Bluesky APIクライアント
+            username: Blueskyユーザー名（リフレッシュ用）
+            password: Blueskyパスワード（リフレッシュ用）
         """
         self.client = client
+        self.username = username
+        self.password = password
 
     def compress_image(self, compress_image_for_platform, image_path):
         """
@@ -98,13 +102,11 @@ class BlueskyPoster:
                 hasattr(e, 'error') and getattr(e, 'error', None) == 'InvalidToken'
             ):
                 try:
-                    if hasattr(self.client, 'refresh_token'):
-                        self.client.refresh_token()
-                    elif hasattr(self.client, 'login'):
-                        # 必要に応じてloginメソッドで再認証
-                        self.client.login()
+                    # loginにはユーザー名・パスワードが必要
+                    if hasattr(self.client, 'login') and self.username and self.password:
+                        self.client.login(self.username, self.password)
                     else:
-                        return {"success": False, "error": "トークンリフレッシュメソッドが見つかりません"}
+                        return {"success": False, "error": "Bluesky認証情報が不足しています（ユーザー名・パスワード）"}
                     return try_post()
                 except Exception as e2:
                     return {"success": False, "error": f"リフレッシュ失敗: {str(e2)}"}
