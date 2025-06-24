@@ -90,9 +90,10 @@ class BlueskyPoster:
                         "$type": "app.bsky.embed.images",
                         "images": images,
                     },
+                    langs=["ja"],
                 )
             else:
-                self.client.send_post(content)
+                self.client.send_post(content, langs=["ja"])
             return {"success": True, "response": "投稿成功"}
 
         try:
