@@ -477,10 +477,16 @@ function showPostResult(result) {
             });
         }
         // 画像もリセット
+        selectedImageFiles = [];
+        // input要素の値もクリア
+        const imageInput = document.getElementById('image-input');
+        if (imageInput) imageInput.value = '';
         if (typeof updateImagePreview === 'function') {
-            selectedImageFiles = [];
             updateImagePreview();
         }
+        // ファイル名表示もクリア
+        const imageFilename = document.getElementById('image-filename');
+        if (imageFilename) imageFilename.textContent = '';
     }
 }
 
