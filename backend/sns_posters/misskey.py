@@ -1,6 +1,6 @@
 import logging
-
 import misskey
+from constants import IMAGE_LIMITS
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +46,9 @@ class MisskeyPoster:
         try:
             file_ids = []
             if image_paths:
+                max_images = IMAGE_LIMITS["misskey"]["max_images"]
+                if len(image_paths) > max_images:
+                    return {"success": False, "error": f"画像は{max_images}枚までです"}
                 file_ids, err = self.upload_images(image_paths)
                 if err:
                     return {"success": False, "error": err}

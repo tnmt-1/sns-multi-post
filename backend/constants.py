@@ -15,5 +15,17 @@ IMAGE_LIMITS = {
         "max_attempts": 15,
         "max_images": 4,
     },
+    "mastodon": {
+        "max_images": 4,
+    },
+    "misskey": {
+        "max_images": 4,
+    },
+    "x": {
+        "max_images": 4,
+    },
+    "threads": {
+        "max_images": 4,
+    },
     # 他SNS用も必要に応じて追加可能
 }

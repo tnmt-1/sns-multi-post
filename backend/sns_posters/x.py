@@ -8,6 +8,7 @@ Attributes:
 
 import os
 import logging
+from constants import IMAGE_LIMITS
 
 from requests_oauthlib import OAuth1
 import requests
@@ -65,6 +66,9 @@ class XPoster:
             media_ids = []
             err = None
             if image_paths:
+                max_images = IMAGE_LIMITS["x"]["max_images"]
+                if len(image_paths) > max_images:
+                    return {"success": False, "error": f"画像は{max_images}枚までです"}
                 media_ids, err = self.upload_images(image_paths)
                 if err:
                     return {"success": False, "error": err}
