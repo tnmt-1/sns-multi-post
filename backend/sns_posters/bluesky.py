@@ -101,12 +101,20 @@ class BlueskyPoster:
         except Exception as e:
             logger.error(f"Bluesky投稿エラー: {str(e)}", exc_info=True)
             # InvalidTokenエラー時はリフレッシュして再試行
-            if (
-                hasattr(e, "args")
-                and e.args
-                and isinstance(e.args[0], str)
-                and "InvalidToken" in e.args[0]
-            ) or (hasattr(e, "error") and getattr(e, "error", None) == "InvalidToken"):
+            def is_invalid_token_error(e):
+                # 1. e.args[0]がstr型で"InvalidToken"を含む
+                if hasattr(e, "args") and e.args:
+                    if isinstance(e.args[0], str) and "InvalidToken" in e.args[0]:
+                        return True
+                    # 2. atproto_client.exceptions.BadRequestError等: e.args[0].content.error == "InvalidToken"
+                    if hasattr(e.args[0], "content") and getattr(e.args[0].content, "error", None) == "InvalidToken":
+                        return True
+                # 3. e.error属性が"InvalidToken"
+                if hasattr(e, "error") and getattr(e, "error", None) == "InvalidToken":
+                    return True
+                return False
+
+            if is_invalid_token_error(e):
                 try:
                     # loginにはユーザー名・パスワードが必要
                     if (
